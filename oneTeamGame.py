@@ -10,11 +10,7 @@ from multiprocessing import Pool
 import numpy as np
 for i in range(1,1231):
     # Generate games, they are 0001 to 1230
-    path = '/Users/tynanseltzer/ap216/project/pics/'
-    if np.random.randint(10) < 8:
-        path += 'train'
-    else:
-        path += 'validation'
+    path = '/Users/tynanseltzer/ap216/project/pics/3/'
     gamestr = '002160'
     gamestr += str(i).zfill(4)
     # Home players
@@ -36,7 +32,7 @@ for i in range(1,1231):
         print ("alive")
     shot_df = pd.concat(appended_data, axis=0)
     plt.scatter(shot_df.LOC_X, shot_df.LOC_Y)
-    homePath = path + '/' + str(homeTeam[0]) + '/' + gamestr
+    homePath = path + gamestr + ".jpg"
     plt.savefig(homePath, dpi=100, frameon='false', aspect = 'normal', bbox_inches='tight', pad_inches=0)
     print ("SAVED A PIC")
     plt.clf()
@@ -51,6 +47,6 @@ for i in range(1,1231):
         appended_data.append(shot_df)
     shot_df = pd.concat(appended_data, axis=0)
     plt.scatter(shot_df.LOC_X, shot_df.LOC_Y)
-    awayPath = path + '/' + str(awayTeam[0]) + '/' + gamestr
+    awayPath = path + gamestr + "away.jpg"
     plt.savefig(awayPath, dpi=100, frameon='false', aspect = 'normal', bbox_inches='tight', pad_inches=0)
     plt.clf()
