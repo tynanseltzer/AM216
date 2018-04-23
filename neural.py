@@ -9,12 +9,10 @@ from keras import backend as K
 img_width, img_height = 100,100
 
 train_data_dir = 'pics/train'
-validation_data_dir = 'pics/validation'
-nb_train_samples = 1958
-nb_validation_samples = 502
+nb_train_samples = 2460
 epochs = 50
-batch_size = 50
-num_classes = 30
+batch_size = 100
+num_classes = 2
 
 if K.image_data_format() == 'channels_first':
     input_shape = (3, img_width, img_height)
@@ -32,7 +30,7 @@ model.add(Flatten())
 model.add(Dense(1000, activation='relu'))
 model.add(Dense(num_classes, activation='softmax'))
 
-model.compile(loss='sparse_categorical_crossentropy',
+model.compile(loss='sparse_binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
