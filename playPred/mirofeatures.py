@@ -51,14 +51,15 @@ def getFeatures(start, end):
                         features['opponent'] = play.drive.game.home
                     else:
                         features['opponent'] = play.drive.game.away
+
+                    #Time left in quarter
                     timeclock = play.time.clock.split(':')
                     features['time'] = float(timeclock[0]) * 60 + float(timeclock[1])
-                    if (play.time.qtr == 1) or (play.time.qtr == 3):
-                        features['time'] += 15 * 60
 
                     features['position'] = 50 - play.yardline.offset
                     features['down'] = play.down
                     features['togo'] = play.yards_togo
+                    features['quarter'] = play.time.qtr
 
                     if 'Shotgun' in play.desc:
                         features['shotgun'] = 1
