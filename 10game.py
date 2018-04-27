@@ -8,10 +8,10 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 import numpy as np
-for i in range(1,1231):
+for i in range(1100,1231):
     # Generate games, they are 0001 to 1230
     print ("ITERS", i)
-    path = '/home/tynan/am216/pics/10/'
+    path = '/Users/tynanseltzer/ap216/project/pics/10/'
     gamestr = '002100'
     gamestr += str(i).zfill(4)
     # Home players

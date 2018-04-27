@@ -11,7 +11,7 @@ import numpy as np
 for i in range(1,1231):
     # Generate games, they are 0001 to 1230
     print ("ITERS", i)
-    path = '/home/tynan/am216/picStore/14/'
+    path = '/Users/tynanseltzer/ap216/project/pics/14/'
     gamestr = '002140'
     gamestr += str(i).zfill(4)
     # Home players
