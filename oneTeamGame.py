@@ -10,7 +10,6 @@ from multiprocessing import Pool
 import numpy as np
 for i in range(1,1231):
     # Generate games, they are 0001 to 1230
-    print ("ITERS", i)
     path = '/Users/tynanseltzer/ap216/project/pics/3/'
     gamestr = '002160'
     gamestr += str(i).zfill(4)
