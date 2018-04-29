@@ -40,6 +40,7 @@ def getAllFeatures(quick=False):
         features = defaultdict(float)
         if(isinstance(play['DESCRIPTION'],int)): continue
         if (' punt' not in play['DESCRIPTION']) \
+                        and (play['OFF'] == play['OFF']) \
                         and (play['DOWN'] != 0) \
                         and ('END ' != play['DESCRIPTION'][:4]) \
                         and ('End ' != play['DESCRIPTION'][:4]) \
@@ -62,12 +63,19 @@ def getAllFeatures(quick=False):
                         and ('Direct Snap' not in play['DESCRIPTION']) \
                         and ('Direct snap' not in play['DESCRIPTION']): 
 
+
+            if(play['OFF'] != play['OFF']): print "This message should never appear, if it does, data cleaning failed"
+
             features['team'] = play['OFF']
             features['season'] = play['SEASON']
             features['isHome'] = (play['HOME_TEAM'] == play['OFF'])
             features['opponent'] = play['DEF']
 
             l = len(passProp[play['OFF']])
+            if(len(passProp[play['OFF']+str((play['SEASON']-1))]) == 0):
+                features['lastszn'] = 0
+            else:
+                features['lastszn'] = np.mean(passProp[play['OFF']+str((play['SEASON']-1))])-0.5
             if(l==0):
                 features['last800'] = 0.5
             elif(l < 800):
@@ -95,9 +103,11 @@ def getAllFeatures(quick=False):
 
             if 'incomplete' in play['DESCRIPTION'] or ' pass ' in play['DESCRIPTION']:
                 isPass.append(1)
+                passProp[play['OFF']+str(play['SEASON'])].append(1)
                 passProp[play['OFF']].append(1)
             else:
                 isPass.append(0)
+                passProp[play['OFF']+str(play['SEASON'])].append(0)
                 passProp[play['OFF']].append(0)
 
             all_features.append(features)
