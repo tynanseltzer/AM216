@@ -2,7 +2,12 @@ import pandas as pd
 from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score
 
+
+def cross_val(clf, X, isPass):
+    clfScore = cross_val_score(clf,X, isPass, cv=10)
+    print("Cross validation accuracy with 10 folds is %0.2f (+/- %0.2f)" % (clfScore.mean(), clfScore.std() * 2))
 
 def conf_m(confusion_matrix):
     confusion_matrix_normalized = confusion_matrix.astype('float') / confusion_matrix.sum(axis=1)[:, np.newaxis] * 100.0
@@ -24,17 +29,18 @@ def conf_m(confusion_matrix):
     plt.xlabel('Predicted label')
     return plt
 
-def getAllFeatures():
+def getAllFeatures(quick=False):
+    data = pd.read_csv('nflplaydata.csv', sep = '	')
     all_features = []
     isPass = []
-    season = []
     passProp = defaultdict(list)
 
     for idx, play in data.iterrows():
+        if quick and idx > 10000: break
         features = defaultdict(float)
         if(isinstance(play['DESCRIPTION'],int)): continue
         if (' punt' not in play['DESCRIPTION']) \
-        				and (play['DOWN'] != 0) \
+                        and (play['DOWN'] != 0) \
                         and ('END ' != play['DESCRIPTION'][:4]) \
                         and ('End ' != play['DESCRIPTION'][:4]) \
                         and ('Two-Minute Warning' not in play['DESCRIPTION']) \
@@ -60,6 +66,19 @@ def getAllFeatures():
             features['season'] = play['SEASON']
             features['isHome'] = (play['HOME_TEAM'] == play['OFF'])
             features['opponent'] = play['DEF']
+
+            l = len(passProp[play['OFF']])
+            if(l==0):
+                features['last800'] = 0.5
+            elif(l < 800):
+                features['last800'] = sum(passProp[play['OFF']][-l:])/float(l)
+            else:
+                features['last800'] = sum(passProp[play['OFF']][-800:])/800.
+
+            if(l==0):
+                features['lastPlay'] = 1
+            else:
+                features['lastPlay'] = passProp[play['OFF']][-1]
 
 
             #features['position'] = 50 - play.yardline.offset
