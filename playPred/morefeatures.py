@@ -1,11 +1,34 @@
 import pandas as pd
 from collections import defaultdict
 import numpy as np
+import matplotlib.pyplot as plt
+
+
+def conf_m(confusion_matrix):
+    confusion_matrix_normalized = confusion_matrix.astype('float') / confusion_matrix.sum(axis=1)[:, np.newaxis] * 100.0
+    plt.matshow(confusion_matrix_normalized)
+    width = len(confusion_matrix)
+    height = len(confusion_matrix[0])
+    for x in xrange(width):
+        for y in xrange(height):
+            plt.gca().annotate("{:5.2f} %".format(confusion_matrix_normalized[x][y]), xy=(y, x),
+                               horizontalalignment='center',
+                               verticalalignment='center')
+
+    tick_labels = ['Run', 'Pass']
+    plt.xticks(range(width), tick_labels)
+    plt.yticks(range(height), tick_labels)
+    plt.title('Normalized confusion matrix')
+    plt.colorbar()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    return plt
 
 def getAllFeatures():
-    data = pd.read_csv('nflplaydata.csv', sep = '	')
     all_features = []
     isPass = []
+    season = []
+    passProp = defaultdict(list)
 
     for idx, play in data.iterrows():
         features = defaultdict(float)
@@ -34,6 +57,7 @@ def getAllFeatures():
                         and ('Direct snap' not in play['DESCRIPTION']): 
 
             features['team'] = play['OFF']
+            features['season'] = play['SEASON']
             features['isHome'] = (play['HOME_TEAM'] == play['OFF'])
             features['opponent'] = play['DEF']
 
@@ -52,8 +76,10 @@ def getAllFeatures():
 
             if 'incomplete' in play['DESCRIPTION'] or ' pass ' in play['DESCRIPTION']:
                 isPass.append(1)
+                passProp[play['OFF']].append(1)
             else:
                 isPass.append(0)
+                passProp[play['OFF']].append(0)
 
             all_features.append(features)
 
