@@ -3,6 +3,8 @@ from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import cross_val_score
+import matplotlib.style
+import matplotlib as mpl
 
 
 def cross_val(clf, X, isPass):
@@ -23,7 +25,7 @@ def conf_m(confusion_matrix):
     tick_labels = ['Run', 'Pass']
     plt.xticks(range(width), tick_labels)
     plt.yticks(range(height), tick_labels)
-    plt.title('Normalized confusion matrix')
+    plt.title('Confusion Matrix', y=1.1)
     plt.colorbar()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
