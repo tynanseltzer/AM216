@@ -34,12 +34,14 @@ def getAllFeatures(quick=False):
     all_features = []
     isPass = []
     passProp = defaultdict(list)
+    defProp = defaultdict(list)
 
     for idx, play in data.iterrows():
         if quick and idx > 10000: break
         features = defaultdict(float)
         if(isinstance(play['DESCRIPTION'],int)): continue
         if (' punt' not in play['DESCRIPTION']) \
+                        and (play['OFF'] == play['OFF']) \
                         and (play['DOWN'] != 0) \
                         and ('END ' != play['DESCRIPTION'][:4]) \
                         and ('End ' != play['DESCRIPTION'][:4]) \
@@ -62,18 +64,33 @@ def getAllFeatures(quick=False):
                         and ('Direct Snap' not in play['DESCRIPTION']) \
                         and ('Direct snap' not in play['DESCRIPTION']): 
 
+
+            if(play['OFF'] != play['OFF']): print "This message should never appear, if it does, data cleaning failed"
+
             features['team'] = play['OFF']
             features['season'] = play['SEASON']
             features['isHome'] = (play['HOME_TEAM'] == play['OFF'])
             features['opponent'] = play['DEF']
 
             l = len(passProp[play['OFF']])
+            h = len(defProp[play['DEF']])
+            if(len(passProp[play['OFF']+str((play['SEASON']-1))]) == 0):
+                features['lastszn'] = 0
+            else:
+                features['lastszn'] = np.mean(passProp[play['OFF']+str((play['SEASON']-1))])-0.5
             if(l==0):
                 features['last800'] = 0.5
             elif(l < 800):
                 features['last800'] = sum(passProp[play['OFF']][-l:])/float(l)
             else:
                 features['last800'] = sum(passProp[play['OFF']][-800:])/800.
+
+            if(h==0):
+                features['def800'] = 0.5
+            elif(h < 800):
+                features['def800'] = sum(defProp[play['DEF']][-l:])/float(l)
+            else:
+                features['def800'] = sum(defProp[play['DEF']][-800:])/800.
 
             if(l==0):
                 features['lastPlay'] = 1
@@ -86,6 +103,8 @@ def getAllFeatures(quick=False):
             features['togo'] = play['YARDS_TO_FIRST']
             features['togoal'] = play['YARDS_TO_GOAL']
             features['ptdiff'] = play['OFF_SCORE']-play['DEF_SCORE']
+            if(features['ptdiff'] > 7): features['over7'] = 1
+            else: features['over7'] = 0
             features['quarter'] = play['QTR']
 
             if 'Shotgun' in play['DESCRIPTION']:
@@ -95,20 +114,21 @@ def getAllFeatures(quick=False):
 
             if 'incomplete' in play['DESCRIPTION'] or ' pass ' in play['DESCRIPTION']:
                 isPass.append(1)
+                passProp[play['OFF']+str(play['SEASON'])].append(1)
                 passProp[play['OFF']].append(1)
+                defProp[play['DEF']].append(1)
             else:
                 isPass.append(0)
+                passProp[play['OFF']+str(play['SEASON'])].append(0)
                 passProp[play['OFF']].append(0)
+                defProp[play['DEF']].append(0)
 
             all_features.append(features)
 
     return all_features, isPass
 
+
 def get(quick=False):
-    data = pd.read_csv('nflplaydata.csv', sep = '	')
-    all_features = []
-    isPass = []
-    passProp = defaultdict(list)
 
     downs = []
     togos = []
@@ -120,11 +140,22 @@ def get(quick=False):
     seasons = []
     isHomes = []
     opponents = []
+    lastszns = []
+    last800s = []
+    lastPlays = []
+    def800s = []
+    data = pd.read_csv('nflplaydata.csv', sep = '	')
+    all_features = []
+    isPass = []
+    passProp = defaultdict(list)
+    defProp = defaultdict(list)
+
     for idx, play in data.iterrows():
         if quick and idx > 10000: break
         features = defaultdict(float)
         if(isinstance(play['DESCRIPTION'],int)): continue
         if (' punt' not in play['DESCRIPTION']) \
+                        and (play['OFF'] == play['OFF']) \
                         and (play['DOWN'] != 0) \
                         and ('END ' != play['DESCRIPTION'][:4]) \
                         and ('End ' != play['DESCRIPTION'][:4]) \
@@ -147,18 +178,33 @@ def get(quick=False):
                         and ('Direct Snap' not in play['DESCRIPTION']) \
                         and ('Direct snap' not in play['DESCRIPTION']): 
 
+
+            if(play['OFF'] != play['OFF']): print "This message should never appear, if it does, data cleaning failed"
+
             features['team'] = play['OFF']
             features['season'] = play['SEASON']
             features['isHome'] = (play['HOME_TEAM'] == play['OFF'])
             features['opponent'] = play['DEF']
 
             l = len(passProp[play['OFF']])
+            h = len(defProp[play['DEF']])
+            if(len(passProp[play['OFF']+str((play['SEASON']-1))]) == 0):
+                features['lastszn'] = 0
+            else:
+                features['lastszn'] = np.mean(passProp[play['OFF']+str((play['SEASON']-1))])-0.5
             if(l==0):
                 features['last800'] = 0.5
             elif(l < 800):
                 features['last800'] = sum(passProp[play['OFF']][-l:])/float(l)
             else:
                 features['last800'] = sum(passProp[play['OFF']][-800:])/800.
+
+            if(h==0):
+                features['def800'] = 0.5
+            elif(h < 800):
+                features['def800'] = sum(defProp[play['DEF']][-l:])/float(l)
+            else:
+                features['def800'] = sum(defProp[play['DEF']][-800:])/800.
 
             if(l==0):
                 features['lastPlay'] = 1
@@ -171,6 +217,8 @@ def get(quick=False):
             features['togo'] = play['YARDS_TO_FIRST']
             features['togoal'] = play['YARDS_TO_GOAL']
             features['ptdiff'] = play['OFF_SCORE']-play['DEF_SCORE']
+            if(features['ptdiff'] > 7): features['over7'] = 1
+            else: features['over7'] = 0
             features['quarter'] = play['QTR']
 
             if 'Shotgun' in play['DESCRIPTION']:
@@ -180,11 +228,17 @@ def get(quick=False):
 
             if 'incomplete' in play['DESCRIPTION'] or ' pass ' in play['DESCRIPTION']:
                 isPass.append(1)
+                passProp[play['OFF']+str(play['SEASON'])].append(1)
                 passProp[play['OFF']].append(1)
+                defProp[play['DEF']].append(1)
             else:
                 isPass.append(0)
+                passProp[play['OFF']+str(play['SEASON'])].append(0)
                 passProp[play['OFF']].append(0)
-
+                defProp[play['DEF']].append(0)
+                
+                
+        
                 
             downs.append(features['down'])
             togos.append(features['togo'])  
@@ -195,8 +249,12 @@ def get(quick=False):
             teams.append(features['team'])  
             seasons.append(features['season'])  
             isHomes.append(features['isHome'])  
-            opponents.append(features['opponent'])  
+            opponents.append(features['opponent']) 
+            lastszns.append(features['lastszn'])
+            last800s.append(features['last800'])
+            lastPlays.append(features['lastPlay'])
+            def800s.append(features['def800'])
             all_features.append(features)
             
 
-    return  downs, togos, togoals, ptdiffs, quarters, shotguns, teams, seasons, isHomes, opponents, isPass
+    return  downs, togos, togoals, ptdiffs, quarters, shotguns, teams, seasons, isHomes, opponents, lastszns, last800s, lastPlays, def800s, isPass
