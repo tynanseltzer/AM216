@@ -34,6 +34,7 @@ def getAllFeatures(quick=False):
     all_features = []
     isPass = []
     passProp = defaultdict(list)
+    defProp = defaultdict(list)
 
     for idx, play in data.iterrows():
         if quick and idx > 10000: break
@@ -72,6 +73,7 @@ def getAllFeatures(quick=False):
             features['opponent'] = play['DEF']
 
             l = len(passProp[play['OFF']])
+            h = len(defProp[play['DEF']])
             if(len(passProp[play['OFF']+str((play['SEASON']-1))]) == 0):
                 features['lastszn'] = 0
             else:
@@ -82,6 +84,13 @@ def getAllFeatures(quick=False):
                 features['last800'] = sum(passProp[play['OFF']][-l:])/float(l)
             else:
                 features['last800'] = sum(passProp[play['OFF']][-800:])/800.
+
+            if(h==0):
+                features['def800'] = 0.5
+            elif(h < 800):
+                features['def800'] = sum(defProp[play['DEF']][-l:])/float(l)
+            else:
+                features['def800'] = sum(defProp[play['DEF']][-800:])/800.
 
             if(l==0):
                 features['lastPlay'] = 1
@@ -94,6 +103,8 @@ def getAllFeatures(quick=False):
             features['togo'] = play['YARDS_TO_FIRST']
             features['togoal'] = play['YARDS_TO_GOAL']
             features['ptdiff'] = play['OFF_SCORE']-play['DEF_SCORE']
+            if(features['ptdiff'] > 7): features['over7'] = 1
+            else: features['over7'] = 0
             features['quarter'] = play['QTR']
 
             if 'Shotgun' in play['DESCRIPTION']:
@@ -105,10 +116,12 @@ def getAllFeatures(quick=False):
                 isPass.append(1)
                 passProp[play['OFF']+str(play['SEASON'])].append(1)
                 passProp[play['OFF']].append(1)
+                defProp[play['DEF']].append(1)
             else:
                 isPass.append(0)
                 passProp[play['OFF']+str(play['SEASON'])].append(0)
                 passProp[play['OFF']].append(0)
+                defProp[play['DEF']].append(0)
 
             all_features.append(features)
 
